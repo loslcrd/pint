@@ -32,12 +32,12 @@ async function runProviderService(torrentHash: string) {
     try {
       const downloadLinks =
         await realDebridService.getDownloadLinks(torrentHash);
-      alert("Download Links:\n" + JSON.stringify(downloadLinks));
+      browser.runtime.sendMessage({action: "displayDownloadLinks", links: downloadLinks})
     } catch (error) {
       console.error("Error fetching download links:", error);
-      alert("Failed to fetch download links.");
+      browser.runtime.sendMessage({ action: "displayError", error: "Failed to fetch download links." });
     }
   } else {
-    alert("No API Key configured. Please configure the RealDebrid API Key.");
+    browser.runtime.sendMessage({ action: "displayError", error: "No API Key configured. Please configure the RealDebrid API Key." });
   }
 }

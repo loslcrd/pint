@@ -3,6 +3,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (realDebridApiKey) {
     (document.getElementById('apiKey') as HTMLInputElement).value = realDebridApiKey;
   }
+
+  function displayDownloadLinks(links: { [filename: string]: string }) {
+    const linksContainer = document.getElementById("linksContainer");
+    if (linksContainer) {
+      linksContainer.innerHTML = ""; // clear previous links
+
+      for (const filename in links) {
+        if (links.hasOwnProperty(filename)) {
+          const linkElement = document.createElement("a");
+          linkElement.href = links[filename];
+          linkElement.textContent = filename;
+          linkElement.target = "_blank"; // Open in new tab
+          linksContainer.appendChild(linkElement);
+          linksContainer.appendChild(document.createElement("br")); // Line break
+        }
+
+      }
+    }
+  }
+
+  browser.runtime.onMessage.addListener((message) => {
+    if (message.action === "displayDownloadLinks") {
+      displayDownloadLinks(message.links);
+    } else if (message.action === "displayError") {
+      displayError(message.error);
+    }
+  });
 });
 
 document.getElementById('searchHash')?.addEventListener('click', () => {
@@ -24,3 +51,10 @@ document.getElementById('saveApiKey')?.addEventListener('click', () => {
       });
   }
 });
+
+function displayError(error: string) {
+  const linksContainer = document.getElementById("linksContainer");
+  if (linksContainer) {
+    linksContainer.innerHTML = `<p style="color:red;">${error}</p>`;
+  }
+}
