@@ -10,6 +10,7 @@
       "outDir": "dist/js",
       "noEmitOnError": true,
       "typeRoots": [ "node_modules/@types" ],
-      "types": ["firefox-webext-browser"]
+      "types": ["firefox-webext-browser"],
+     "jsx": "react"
    }
 }

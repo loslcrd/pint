@@ -5,7 +5,7 @@ const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
   entry: {
-    popup: path.resolve(srcDir, "popup.ts"),
+    popup: path.resolve(srcDir, "popup.tsx"),
     provider_service: path.resolve(srcDir, "provider-service.ts"),
     real_debrid_types: path.resolve(srcDir, "types", "real-debrid-types.ts"),
     real_debrid_service: path.resolve(srcDir, "real-debrid-service.ts"),
@@ -17,7 +17,7 @@ module.exports = {
     filename: "[name].js",
   },
   resolve: {
-    extensions: [".ts", ".js"],
+    extensions: [".tsx", ".ts", ".js"],
   },
   module: {
     rules: [
