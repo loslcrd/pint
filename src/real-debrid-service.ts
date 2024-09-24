@@ -15,12 +15,17 @@ export class RealDebridService extends ProviderService {
   }
 
   async getDownloadLinks(
-      torrentHash: string,
+    torrentHash: string,
   ): Promise<{ [filename: string]: string }> {
-    console.log(`getDownloadLinks: Starting to process torrent hash: ${torrentHash}`);
+    console.log(
+      `getDownloadLinks: Starting to process torrent hash: ${torrentHash}`,
+    );
 
     const files = await this.checkTorrentAvailability(torrentHash);
-    console.log(`getDownloadLinks: Torrent availability checked, received files:`, files);
+    console.log(
+      `getDownloadLinks: Torrent availability checked, received files:`,
+      files,
+    );
 
     if (Object.keys(files).length == 0) {
       console.log("the torrent is not available in instant download.");
@@ -31,7 +36,9 @@ export class RealDebridService extends ProviderService {
     console.log(`getDownloadLinks: Extracted file IDs:`, fileIds);
 
     const torrentId = await this.addMagnet(torrentHash);
-    console.log(`getDownloadLinks: Magnet added, received torrentId: ${torrentId}`);
+    console.log(
+      `getDownloadLinks: Magnet added, received torrentId: ${torrentId}`,
+    );
 
     await this.selectFiles(torrentId, fileIds);
     console.log(`getDownloadLinks: Files selected for torrentId: ${torrentId}`);
@@ -43,15 +50,20 @@ export class RealDebridService extends ProviderService {
 
     for (const rdLink of rdLinks) {
       console.log(`getDownloadLinks: Processing RD link: ${rdLink}`);
-      const [filename, downloadLink] = await this.getUnrestrictedDownloadLink(rdLink);
-      console.log(`getDownloadLinks: Unrestricted download link retrieved for file: ${filename}, link: ${downloadLink}`);
+      const [filename, downloadLink] =
+        await this.getUnrestrictedDownloadLink(rdLink);
+      console.log(
+        `getDownloadLinks: Unrestricted download link retrieved for file: ${filename}, link: ${downloadLink}`,
+      );
       downloadLinks[filename] = downloadLink;
     }
 
-    console.log(`getDownloadLinks: Final download links object:`, downloadLinks);
+    console.log(
+      `getDownloadLinks: Final download links object:`,
+      downloadLinks,
+    );
     return downloadLinks;
   }
-
 
   private async addMagnet(torrentHash: string): Promise<string> {
     const url = "https://api.real-debrid.com/rest/1.0/torrents/addMagnet";
@@ -150,5 +162,4 @@ export class RealDebridService extends ProviderService {
 
     return fileIds;
   }
-
 }
