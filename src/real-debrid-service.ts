@@ -19,17 +19,19 @@ export class RealDebridService extends ProviderService {
   ): Promise<{ [filename: string]: string }> {
     console.log(`getDownloadLinks: Starting to process torrent hash: ${torrentHash}`);
 
-    const torrentId = await this.addMagnet(torrentHash);
-    console.log(`getDownloadLinks: Magnet added, received torrentId: ${torrentId}`);
-
     const files = await this.checkTorrentAvailability(torrentHash);
     console.log(`getDownloadLinks: Torrent availability checked, received files:`, files);
-    for (const filesKey in files) {
-      console.log('\t' + filesKey)
+
+    if (Object.keys(files).length == 0) {
+      console.log("the torrent is not available in instant download.");
+      return {};
     }
 
     const fileIds = this.getFileIds(files);
     console.log(`getDownloadLinks: Extracted file IDs:`, fileIds);
+
+    const torrentId = await this.addMagnet(torrentHash);
+    console.log(`getDownloadLinks: Magnet added, received torrentId: ${torrentId}`);
 
     await this.selectFiles(torrentId, fileIds);
     console.log(`getDownloadLinks: Files selected for torrentId: ${torrentId}`);
@@ -124,13 +126,23 @@ export class RealDebridService extends ProviderService {
   }
 
   private getFileIds(files: TorrentAvailabilityResponse): string[] {
-    const fileIds: string[] = [];
+    /**
+     * For now, this function returns all the file ids that can be downloaded instantly in one time.
+     * This needs to be modified in the future for the user to be able to download only the files that he wants
+     * in the torrent.
+     */
+    let fileIds: string[] = [];
+    let maxFileCount = 0;
 
     for (const hash in files) {
       if (files[hash]?.rd) {
         files[hash].rd.forEach((variant) => {
-          for (const fileId in variant) {
-            fileIds.push(fileId);
+          const currentFileIds: string[] = Object.keys(variant);
+          const fileCount = currentFileIds.length;
+
+          if (fileCount > maxFileCount) {
+            maxFileCount = fileCount;
+            fileIds = currentFileIds;
           }
         });
       }
@@ -138,4 +150,5 @@ export class RealDebridService extends ProviderService {
 
     return fileIds;
   }
+
 }
