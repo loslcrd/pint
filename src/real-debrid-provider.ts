@@ -5,13 +5,23 @@ import {
   TorrentInfo,
   UnRestrictLinkResponse,
 } from "./types/real-debrid-types";
+import {
+  CannotAddMagnetError,
+  DownloadLinkError,
+  ProviderError,
+  TorrentNotAvailableError,
+} from "./types/errors";
 
-export class RealDebridService extends ProviderService {
+export class RealDebridProvider implements Provider {
   private readonly apiKey: string;
+  private providerService: ProviderService;
 
-  constructor(apiKey: string) {
-    super();
+  constructor(providerService: ProviderService, apiKey: string) {
+    this.providerService = providerService;
     this.apiKey = apiKey;
+  }
+  getProviderName(): string {
+    return "realDebrid";
   }
 
   async getDownloadLinks(
@@ -22,14 +32,9 @@ export class RealDebridService extends ProviderService {
     );
 
     const files = await this.checkTorrentAvailability(torrentHash);
-    console.log(
-      `getDownloadLinks: Torrent availability checked, received files:`,
-      files,
-    );
-
+    console.log(files);
     if (Object.keys(files).length == 0) {
-      console.log("the torrent is not available in instant download.");
-      return {};
+      throw new TorrentNotAvailableError();
     }
 
     const fileIds = this.getFileIds(files);
@@ -52,9 +57,7 @@ export class RealDebridService extends ProviderService {
       console.log(`getDownloadLinks: Processing RD link: ${rdLink}`);
       const [filename, downloadLink] =
         await this.getUnrestrictedDownloadLink(rdLink);
-      console.log(
-        `getDownloadLinks: Unrestricted download link retrieved for file: ${filename}, link: ${downloadLink}`,
-      );
+
       downloadLinks[filename] = downloadLink;
     }
 
@@ -69,13 +72,17 @@ export class RealDebridService extends ProviderService {
     const url = "https://api.real-debrid.com/rest/1.0/torrents/addMagnet";
     const magnetLink = this.getMagnetLink(torrentHash);
 
-    const response = await this.fetchWithCors(url, this.apiKey, {
-      method: "POST",
-      body: new URLSearchParams({ magnet: magnetLink }),
-    });
+    const response = await this.providerService.fetchWithCors(
+      url,
+      this.apiKey,
+      {
+        method: "POST",
+        body: new URLSearchParams({ magnet: magnetLink }),
+      },
+    );
 
     if (!response.ok) {
-      throw new Error(`Error adding magnet: ${response.statusText}`);
+      throw new CannotAddMagnetError((await response.json()).error);
     }
 
     const data = (await response.json()) as AddMagnetResponse;
@@ -90,9 +97,18 @@ export class RealDebridService extends ProviderService {
     infoHash: string,
   ): Promise<TorrentAvailabilityResponse> {
     const url = `https://api.real-debrid.com/rest/1.0/torrents/instantAvailability/${infoHash}`;
-    const response = await this.fetchWithCors(url, this.apiKey, {
-      method: "GET",
-    });
+    const response = await this.providerService.fetchWithCors(
+      url,
+      this.apiKey,
+      {
+        method: "GET",
+      },
+    );
+    if (!response.ok) {
+      throw new ProviderError(
+        `Cannot check torrent availability: ${(await response.json()).error}`,
+      );
+    }
     return (await response.json()) as TorrentAvailabilityResponse;
   }
 
@@ -101,21 +117,35 @@ export class RealDebridService extends ProviderService {
     fileIds: string[],
   ): Promise<void> {
     const url = `https://api.real-debrid.com/rest/1.0/torrents/selectFiles/${torrentId}`;
-    const response = await this.fetchWithCors(url, this.apiKey, {
-      method: "POST",
-      body: new URLSearchParams({ files: fileIds.join(",") }),
-    });
+    const response = await this.providerService.fetchWithCors(
+      url,
+      this.apiKey,
+      {
+        method: "POST",
+        body: new URLSearchParams({ files: fileIds.join(",") }),
+      },
+    );
 
     if (!response.ok) {
-      throw new Error(`Error selecting files: ${response.statusText}`);
+      throw new ProviderError(
+        `Cannot select files: ${(await response.json()).error}`,
+      );
     }
   }
 
   private async getRdLinks(torrentId: string): Promise<string[]> {
     const url = `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`;
-    const response = await this.fetchWithCors(url, this.apiKey, {
-      method: "GET",
-    });
+    const response = await this.providerService.fetchWithCors(
+      url,
+      this.apiKey,
+      {
+        method: "GET",
+      },
+    );
+
+    if (!response.ok) {
+      throw new DownloadLinkError((await response.json()).error);
+    }
     const data = (await response.json()) as TorrentInfo;
     return data.links;
   }
@@ -124,13 +154,17 @@ export class RealDebridService extends ProviderService {
     originalLink: string,
   ): Promise<[string, string]> {
     const url = "https://api.real-debrid.com/rest/1.0/unrestrict/link";
-    const response = await this.fetchWithCors(url, this.apiKey, {
-      method: "POST",
-      body: new URLSearchParams({ link: originalLink }),
-    });
+    const response = await this.providerService.fetchWithCors(
+      url,
+      this.apiKey,
+      {
+        method: "POST",
+        body: new URLSearchParams({ link: originalLink }),
+      },
+    );
 
     if (!response.ok) {
-      throw new Error(`Error unrestricting link: ${response.statusText}`);
+      throw new DownloadLinkError((await response.json()).error);
     }
 
     const data = (await response.json()) as UnRestrictLinkResponse;

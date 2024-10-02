@@ -1,4 +1,4 @@
-export class CorsProxyService {
+export class CorsProxy {
   private readonly corsProxyPrefix: string;
   constructor(corsProxyPrefix: string) {
     this.corsProxyPrefix = corsProxyPrefix;
