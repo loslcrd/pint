@@ -5,3 +5,8 @@ export interface ProviderResponse {
 export interface ProviderResults {
   [providerName: string]: Error | ProviderResponse;
 }
+
+export interface ApiKeys {
+  realDebrid: string;
+  // allDebrid: string;
+}

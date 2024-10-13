@@ -1,12 +1,12 @@
 // src/popup.tsx
 import React, { useState, useEffect, useCallback } from "react";
-import ReactDOM from "react-dom";
+import "./styles.css";
 import { createRoot } from "react-dom/client";
-import { ProviderService } from "./providers/provider-service";
-import { ProviderError } from "./providers/provider-errors";
-import { ProviderResponse, ProviderResults } from "./providers/provider-misc";
-import { Simulate } from "react-dom/test-utils";
-import load = Simulate.load;
+import {
+  ApiKeys,
+  ProviderResponse,
+  ProviderResults,
+} from "./providers/provider-misc";
 
 // Main page component
 const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
@@ -58,12 +58,12 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
 
   return (
     <div style={{ padding: "10px" }}>
-      <h2>Main Page</h2>
+      <h2>PINT 🍺</h2>
       <button onClick={searchForHash}>Fetch file(s)</button>
       <br />
       <button onClick={navigateToConfig}>Configure</button>
 
-      {loading && <p>Loading...</p>}
+      {loading && <p className="loading">Loading...</p>}
 
       {Object.keys(links).length > 0 && (
         <div>
@@ -108,7 +108,7 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
 
 // Configuration page component
 const ConfigPage = ({ navigateToMain }: { navigateToMain: () => void }) => {
-  const [apiKeys, setApiKeys] = useState<{ [provider: string]: string }>({
+  const [apiKeys, setApiKeys] = useState<ApiKeys>({
     realDebrid: "",
     // not yet implemented:
     // allDebrid: "",
