@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config webpack/webpack.config.js"
+    "build-dev": "webpack --config webpack/webpack.config.js --mode=development",
+    "build-prod": "webpack --config webpack/webpack.config.js --mode=production"
   },
   "keywords": [],
   "author": "",
