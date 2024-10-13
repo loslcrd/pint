@@ -1,5 +1,6 @@
-import { RealDebridProvider } from "./real-debrid-provider";
+import { RealDebridProvider } from "./real-debrid/real-debrid-provider";
 import { ProviderService } from "./provider-service";
+import { Provider } from "./provider";
 
 export class ProviderFactory {
   readonly providerNames: string[] = ["realDebrid"];

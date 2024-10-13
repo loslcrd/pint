@@ -1,6 +1,8 @@
-import { CorsProxy } from "./cors-proxy";
+import { CorsProxy } from "../cors-proxy";
 import { ProviderFactory } from "./provider-factory";
-import { ProviderError } from "./types/errors";
+import { ProviderError } from "./provider-errors";
+import { Provider } from "./provider";
+import { ProviderResponse } from "./provider-misc";
 
 export class ProviderService {
   private readonly corsProxy: CorsProxy;
@@ -18,14 +20,14 @@ export class ProviderService {
     console.log(this.providers);
   }
 
-  public async getDownloadLinks(torrentHash: string) {
+  public async getLinks(torrentHash: string) {
     const links: {
-      [providerName: string]: Error | { [filename: string]: string };
+      [providerName: string]: Error | ProviderResponse;
     } = {};
     for (const provider of this.providers) {
       try {
         links[provider.getProviderName()] =
-          await provider.getDownloadLinks(torrentHash);
+          await provider.getLinks(torrentHash);
       } catch (error) {
         links[provider.getProviderName()] = error as ProviderError;
       }

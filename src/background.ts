@@ -1,5 +1,5 @@
-import { ProviderService } from "./provider-service";
-import { ApiKeyNotFoundError } from "./types/errors";
+import { ProviderService } from "./providers/provider-service";
+import { ApiKeyNotFoundError } from "./providers/provider-errors";
 
 browser.runtime.onMessage.addListener(async (message) => {
   if (message.action === "searchForHash") {
@@ -36,9 +36,9 @@ async function runProviderService(torrentHash: string) {
     const providerService = new ProviderService();
     providerService.initialize(apiKeys);
     try {
-      const downloadLinks = await providerService.getDownloadLinks(torrentHash);
+      const downloadLinks = await providerService.getLinks(torrentHash);
       browser.runtime.sendMessage({
-        action: "displayDownloadLinks",
+        action: "displayLinks",
         links: downloadLinks,
       });
     } catch (error) {

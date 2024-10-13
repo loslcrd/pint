@@ -1,4 +1,4 @@
-import { HashNotFoundError } from "./types/errors";
+import { HashNotFoundError } from "./providers/provider-errors";
 
 function searchForTorrentHash(): void {
   const htmlContent = document.documentElement.innerHTML;

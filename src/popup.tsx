@@ -2,34 +2,45 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
-import { ProviderService } from "./provider-service";
-import { ProviderError } from "./types/errors";
+import { ProviderService } from "./providers/provider-service";
+import { ProviderError } from "./providers/provider-errors";
+import { ProviderResponse, ProviderResults } from "./providers/provider-misc";
 
 // Main page component
 const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
-  const [downloadLinks, setDownloadLinks] = useState<{
-    [providerName: string]: Error | { [filename: string]: string };
-  }>({});
+  const [links, setLinks] = useState<ProviderResults>({});
   const [error, setError] = useState<Error | null>(null);
 
   const handleMessageReceived = useCallback((message: any) => {
     if (message.action !== undefined) console.log(message);
     if (message.action === "displayError") {
       setError(message.error);
-    } else if (message.action === "displayDownloadLinks") {
-      setDownloadLinks(message.links);
+    } else if (message.action === "displayLinks") {
+      setLinks(message.links);
+      saveLinksToStorage(message.links);
       setError(null);
     }
   }, []);
 
   useEffect(() => {
+    loadLinksFromStorage();
     browser.runtime.onMessage.addListener(handleMessageReceived);
     return () =>
       browser.runtime.onMessage.removeListener(handleMessageReceived);
   }, [handleMessageReceived]);
 
+  const saveLinksToStorage = (links: ProviderResults) => {
+    browser.storage.local.set({ links: links });
+  };
+
+  const loadLinksFromStorage = async () => {
+    const result = await browser.storage.local.get("links");
+    if (result.links) {
+      setLinks(result.links);
+    }
+  };
+
   const searchForHash = () => {
-    // Send a message to background to search for a hash
     browser.runtime.sendMessage({ action: "searchForHash" });
   };
 
@@ -40,39 +51,35 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
       <br />
       <button onClick={navigateToConfig}>Configure</button>
 
-      {Object.keys(downloadLinks).length > 0 && (
+      {Object.keys(links).length > 0 && (
         <div>
           <h3>Download Links</h3>
           <ul>
-            {Object.keys(downloadLinks).map((provider) => (
+            {Object.keys(links).map((provider) => (
               <li key={provider}>
                 <strong>{provider}</strong>
                 <ul>
-                  {downloadLinks[provider] instanceof Error ? (
-                    <div className="error">
-                      {downloadLinks[provider].message}
-                    </div>
+                  {links[provider] instanceof Error ? (
+                    <div className="error">{links[provider].message}</div>
                   ) : (
                     // If there are no errors, display the list of download links
-                    Object.keys(
-                      downloadLinks[provider] as { [filename: string]: string },
-                    ).map((filename) => (
-                      <li key={filename}>
-                        <a
-                          href={
-                            (
-                              downloadLinks[provider] as {
-                                [filename: string]: string;
-                              }
-                            )[filename]
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {filename}
-                        </a>
-                      </li>
-                    ))
+                    Object.keys(links[provider] as ProviderResponse).map(
+                      (filename) => (
+                        <li key={filename}>
+                          <a
+                            href={
+                              (links[provider] as ProviderResponse)[filename][
+                                "downloadLink"
+                              ]
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {filename}
+                          </a>
+                        </li>
+                      ),
+                    )
                   )}
                 </ul>
               </li>

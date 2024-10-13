@@ -1,16 +1,18 @@
-import { ProviderService } from "./provider-service";
+import { Provider } from "../provider";
+import { ProviderService } from "../provider-service";
+import { ProviderResponse } from "../provider-misc";
 import {
   AddMagnetResponse,
   TorrentAvailabilityResponse,
   TorrentInfo,
   UnRestrictLinkResponse,
-} from "./types/real-debrid-types";
+} from "./real-debrid-types";
 import {
   CannotAddMagnetError,
   DownloadLinkError,
   ProviderError,
   TorrentNotAvailableError,
-} from "./types/errors";
+} from "../provider-errors";
 
 export class RealDebridProvider implements Provider {
   private readonly apiKey: string;
@@ -24,9 +26,7 @@ export class RealDebridProvider implements Provider {
     return "realDebrid";
   }
 
-  async getDownloadLinks(
-    torrentHash: string,
-  ): Promise<{ [filename: string]: string }> {
+  async getLinks(torrentHash: string): Promise<ProviderResponse> {
     console.log(
       `getDownloadLinks: Starting to process torrent hash: ${torrentHash}`,
     );
@@ -51,21 +51,18 @@ export class RealDebridProvider implements Provider {
     const rdLinks = await this.getRdLinks(torrentId);
     console.log(`getDownloadLinks: Real-Debrid links retrieved:`, rdLinks);
 
-    const downloadLinks: { [filename: string]: string } = {};
+    const links: ProviderResponse = {};
 
     for (const rdLink of rdLinks) {
       console.log(`getDownloadLinks: Processing RD link: ${rdLink}`);
       const [filename, downloadLink] =
         await this.getUnrestrictedDownloadLink(rdLink);
 
-      downloadLinks[filename] = downloadLink;
+      links[filename] = { downloadLink: downloadLink };
     }
 
-    console.log(
-      `getDownloadLinks: Final download links object:`,
-      downloadLinks,
-    );
-    return downloadLinks;
+    console.log(`getDownloadLinks: Final download links object:`, links);
+    return links;
   }
 
   private async addMagnet(torrentHash: string): Promise<string> {
