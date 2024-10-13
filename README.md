@@ -14,6 +14,7 @@ PINT will provide you Direct Download links for the torrent file you are about t
 - [Build](#build)
 - [Usage](#usage)
 - [License](#license)
+- [Known bugs](#known-bugs)
 
 ## Installation
 
@@ -39,6 +40,11 @@ The build process uses **Webpack** to bundle the files into a `.dist/` directory
 
 ## Usage
 
+### Load release version of PINT 🍺 in your browser
+Just extract the .zip [latest release](https://github.com/loslcrd/pint/releases/latest) and follow the instructions below.
+
+You will need to reload the extension every time you close Firefox if you are not using a Developer or Nightly build of Firefox. 
+
 ### Load builded PINT 🍺 in your browser
 1. After building the project, open your browser (e.g., Chrome or Firefox).
 2. Go to the extensions page:
@@ -56,6 +62,10 @@ For example, you can find your Real-Debrid API token [here](https://real-debrid.
 Then click on the PINT icon, click on `Configure` and add your token into the provider field you want to use.
 
 When you are on a torrent file description page in your browser, click on PINT icon and click on `Fetch file(s)`. This will query your providers for the files and display the download links into the PINT popup.
+
+## Known bugs
+- Sometimes the extension does not select all the files linked to a torrent hash.
+- ...
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
