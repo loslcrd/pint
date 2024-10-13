@@ -41,9 +41,9 @@ The build process uses **Webpack** to bundle the files into a `.dist/` directory
 ## Usage
 
 ### Load release version of PINT 🍺 in your browser
-Just extract the .zip [latest release](https://github.com/loslcrd/pint/releases/latest) and follow the instructions below.
+- **For Firefox (using the .xpi)**: Go to `about:addons`, click on the gear button and click on `Install Add-on From File...`. Select the `.xpi` file. This method works while the extension is still signed by Mozilla. If they revoke the signature you will have to use the method below.
 
-You will need to reload the extension every time you close Firefox if you are not using a Developer or Nightly build of Firefox. 
+- **Using the .zip**: Just extract the .zip [latest release](https://github.com/loslcrd/pint/releases/latest) and follow the instructions below. You will need to reload the extension every time you close Firefox if you are not using a Developer or Nightly build of Firefox. 
 
 ### Load builded PINT 🍺 in your browser
 1. After building the project, open your browser (e.g., Chrome or Firefox).
