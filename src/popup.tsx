@@ -5,20 +5,25 @@ import { createRoot } from "react-dom/client";
 import { ProviderService } from "./providers/provider-service";
 import { ProviderError } from "./providers/provider-errors";
 import { ProviderResponse, ProviderResults } from "./providers/provider-misc";
+import { Simulate } from "react-dom/test-utils";
+import load = Simulate.load;
 
 // Main page component
 const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
   const [links, setLinks] = useState<ProviderResults>({});
   const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleMessageReceived = useCallback((message: any) => {
     if (message.action !== undefined) console.log(message);
     if (message.action === "displayError") {
       setError(message.error);
+      setLoading(false);
     } else if (message.action === "displayLinks") {
       setLinks(message.links);
       saveLinksToStorage(message.links);
       setError(null);
+      setLoading(false);
     }
   }, []);
 
@@ -40,16 +45,25 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
     }
   };
 
+  const clearLinks = () => {
+    setLinks({});
+    browser.storage.local.remove("links");
+  };
+
   const searchForHash = () => {
+    clearLinks();
+    setLoading(true);
     browser.runtime.sendMessage({ action: "searchForHash" });
   };
 
   return (
     <div style={{ padding: "10px" }}>
       <h2>Main Page</h2>
-      <button onClick={searchForHash}>Search for Hash</button>
+      <button onClick={searchForHash}>Fetch file(s)</button>
       <br />
       <button onClick={navigateToConfig}>Configure</button>
+
+      {loading && <p>Loading...</p>}
 
       {Object.keys(links).length > 0 && (
         <div>
