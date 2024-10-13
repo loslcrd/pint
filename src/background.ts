@@ -1,7 +1,9 @@
+import browser from "webextension-polyfill";
 import { ProviderService } from "./providers/provider-service";
 import { ApiKeyNotFoundError } from "./providers/provider-errors";
+import { ApiKeys } from "./providers/provider-misc";
 
-browser.runtime.onMessage.addListener(async (message) => {
+browser.runtime.onMessage.addListener(async (message: any) => {
   if (message.action === "searchForHash") {
     await runContentJsInCurrentTab();
   }
@@ -26,12 +28,15 @@ async function runContentJsInCurrentTab(): Promise<void> {
 
 async function runProviderService(torrentHash: string) {
   // Retrieve the API key from storage
-  const { apiKeys } = await browser.storage.local.get("apiKeys");
+  const { apiKeys } = (await browser.storage.local.get("apiKeys")) as {
+    apiKeys: ApiKeys;
+  };
   console.log(apiKeys);
   if (
     apiKeys &&
-    Object.keys(apiKeys).filter((key) => apiKeys[key] && apiKeys[key] !== "")
-      .length > 0
+    (Object.keys(apiKeys) as Array<keyof ApiKeys>).filter(
+      (key) => apiKeys[key] && apiKeys[key] !== "",
+    ).length > 0
   ) {
     const providerService = new ProviderService();
     providerService.initialize(apiKeys);

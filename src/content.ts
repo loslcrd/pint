@@ -1,3 +1,4 @@
+import browser from "webextension-polyfill";
 import { HashNotFoundError } from "./providers/provider-errors";
 
 function searchForTorrentHash(): void {

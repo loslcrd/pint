@@ -2,7 +2,7 @@ import { CorsProxy } from "../cors-proxy";
 import { ProviderFactory } from "./provider-factory";
 import { ProviderError } from "./provider-errors";
 import { Provider } from "./provider";
-import { ProviderResponse } from "./provider-misc";
+import { ApiKeys, ProviderResponse } from "./provider-misc";
 
 export class ProviderService {
   private readonly corsProxy: CorsProxy;
@@ -15,7 +15,7 @@ export class ProviderService {
     this.providers = [];
   }
 
-  public initialize(apiKeys: { [provider: string]: string }): void {
+  public initialize(apiKeys: ApiKeys): void {
     this.providers = this.providerFactory.createProviders(this, apiKeys);
     console.log(this.providers);
   }

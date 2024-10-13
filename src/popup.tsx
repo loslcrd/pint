@@ -1,4 +1,4 @@
-// src/popup.tsx
+import browser from "webextension-polyfill";
 import React, { useState, useEffect, useCallback } from "react";
 import "./styles.css";
 import { createRoot } from "react-dom/client";
@@ -25,6 +25,7 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
       setError(null);
       setLoading(false);
     }
+    return true;
   }, []);
 
   useEffect(() => {
@@ -39,7 +40,9 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
   };
 
   const loadLinksFromStorage = async () => {
-    const result = await browser.storage.local.get("links");
+    const result = (await browser.storage.local.get("links")) as {
+      links?: ProviderResults;
+    };
     if (result.links) {
       setLinks(result.links);
     }
@@ -119,7 +122,7 @@ const ConfigPage = ({ navigateToMain }: { navigateToMain: () => void }) => {
     // Load the stored API keys when the config page loads
     browser.storage.local.get("apiKeys").then((result) => {
       if (result.apiKeys) {
-        setApiKeys(result.apiKeys);
+        setApiKeys(result.apiKeys as ApiKeys);
       }
     });
   }, []);

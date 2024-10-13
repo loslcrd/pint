@@ -1,6 +1,7 @@
 import { RealDebridProvider } from "./real-debrid/real-debrid-provider";
 import { ProviderService } from "./provider-service";
 import { Provider } from "./provider";
+import { ApiKeys } from "./provider-misc";
 
 export class ProviderFactory {
   readonly providerNames: string[] = ["realDebrid"];
@@ -9,7 +10,7 @@ export class ProviderFactory {
 
   createProviders(
     providerService: ProviderService,
-    apiKeys: { [provider: string]: string },
+    apiKeys: ApiKeys,
   ): Provider[] {
     const providers: Provider[] = [];
     for (const provider of Object.keys(apiKeys)) {
