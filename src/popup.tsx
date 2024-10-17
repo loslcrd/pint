@@ -13,9 +13,16 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
   const [links, setLinks] = useState<ProviderResults>({});
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(false);
+  const [torrentHashes, setTorrentHashes] = useState<string[]>([]);
+  const [selectedHash, setSelectedHash] = useState("");
 
   const handleMessageReceived = useCallback((message: any) => {
-    if (message.action !== undefined) console.log(message);
+    if (message.action === "torrentHashes") {
+      setTorrentHashes(message.hashes);
+      if (message.hashes.length === 1) {
+        setSelectedHash(message.hashes[0]);
+      }
+    }
     if (message.action === "displayError") {
       setError(message.error);
       setLoading(false);
@@ -28,8 +35,15 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
     return true;
   }, []);
 
+  const handleHashSelectionChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSelectedHash(event.target.value);
+  };
+
   useEffect(() => {
-    loadLinksFromStorage();
+    if (!links) loadLinksFromStorage();
+    searchForHash();
     browser.runtime.onMessage.addListener(handleMessageReceived);
     return () =>
       browser.runtime.onMessage.removeListener(handleMessageReceived);
@@ -54,15 +68,36 @@ const MainPage = ({ navigateToConfig }: { navigateToConfig: () => void }) => {
   };
 
   const searchForHash = () => {
+    browser.runtime.sendMessage({ action: "searchForHash" });
+  };
+
+  const fetchFiles = () => {
     clearLinks();
     setLoading(true);
-    browser.runtime.sendMessage({ action: "searchForHash" });
+    browser.runtime.sendMessage({ action: "fetchFiles", hash: selectedHash });
   };
 
   return (
     <div style={{ padding: "10px" }}>
       <h2>PINT 🍺</h2>
-      <button onClick={searchForHash}>Fetch file(s)</button>
+
+      <select value={selectedHash} onChange={handleHashSelectionChange}>
+        <option value="" disabled>
+          Select a torrent hash
+        </option>
+        {torrentHashes.map((hash) => (
+          <option key={hash} value={hash}>
+            {hash}
+          </option>
+        ))}
+      </select>
+
+      <br />
+
+      <button onClick={fetchFiles} disabled={!selectedHash}>
+        Fetch file(s)
+      </button>
+
       <br />
       <button onClick={navigateToConfig}>Configure</button>
 

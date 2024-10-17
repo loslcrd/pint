@@ -8,8 +8,13 @@ function searchForTorrentHash(): void {
 
   if (matches && matches.length > 0) {
     console.log("Torrent Hash found:\n" + matches.join("\n"));
-    // Optionally, send the found hash back to the background script
-    browser.runtime.sendMessage({ torrentHash: matches[0] }).then();
+
+    browser.runtime
+      .sendMessage({
+        action: "torrentHashes",
+        hashes: Array.from(new Set(matches)),
+      })
+      .then();
   } else {
     throw new HashNotFoundError();
   }

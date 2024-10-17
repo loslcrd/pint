@@ -7,13 +7,12 @@ browser.runtime.onMessage.addListener(async (message: any) => {
   if (message.action === "searchForHash") {
     await runContentJsInCurrentTab();
   }
-  if (message.torrentHash) {
-    await runProviderService(message.torrentHash);
+  if (message.action === "fetchFiles") {
+    await runProviderService(message.hash);
   }
 });
 
 async function runContentJsInCurrentTab(): Promise<void> {
-  console.log("searchForHash received");
   // Get the active tab
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
 
